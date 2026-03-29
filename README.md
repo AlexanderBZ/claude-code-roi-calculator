@@ -1,6 +1,6 @@
 # Claude Code ROI Calculator
 
-Generate an ROI report from your Claude Code sessions. Run one command, automatically get a shareable HTML report of time saved and value created.
+Generate an ROI report from your Claude Code sessions. Run one command, automatically get an interactive HTML report showing time saved, dollar value created, and actionable insights on where AI is—and isn't—working for you.
 
 [![License](https://img.shields.io/github/license/AlexanderBZ/claude-code-roi-calculator)](LICENSE) [![Stars](https://img.shields.io/github/stars/AlexanderBZ/claude-code-roi-calculator)](https://github.com/AlexanderBZ/claude-code-roi-calculator)
 
@@ -8,7 +8,7 @@ Generate an ROI report from your Claude Code sessions. Run one command, automati
 
 ## Install
 
-Inside a Claude Code instance, run the following commands:
+Inside a Claude Code instance, run:
 
 **Step 1: Add the marketplace**
 
@@ -22,88 +22,119 @@ Inside a Claude Code instance, run the following commands:
 /plugin install roi-calculator
 ```
 
-Done! Run `/roi-calculator:generate` in any project to generate your ROI report.
+**Step 3: Install the Python dependency**
+
+```
+pip install anthropic
+```
+
+Done! Run `/roi-calculator:generate` in any project to generate your report.
 
 ---
 
 ## What is Claude Code ROI Calculator?
 
-ROI Calculator reads your Claude Code session history and generates a clear, shareable HTML report showing the time you saved, the dollar value created, and where AI is accelerating your work most.
+ROI Calculator reads your Claude Code session history and generates a self-contained interactive HTML report answering the question every developer should ask: _Is Claude Code actually saving me time?_
 
-| What You Get              | Why It Matters                                                       |
-| ------------------------- | -------------------------------------------------------------------- |
-| **Time saved**            | Per-session estimate of what the task would have taken without AI    |
-| **Acceleration multiple** | How much faster you worked with Claude vs. manually                  |
-| **Dollar value**          | Time saved × hourly rate (default: $75/hr)                           |
-| **Global insights**       | High-ROI areas, low-ROI patterns, and optimization suggestions       |
-| **HTML report**           | Saved locally to `~/.claude/roi-data/` — shareable with stakeholders |
-| **Zero manual input**     | Reads directly from your Claude Code session traces                  |
-| **Local processing**      | All session data stays on-device; nothing leaves your machine        |
+| What You Get                | Why It Matters                                       |
+| --------------------------- | ---------------------------------------------------- |
+| **Time saved per session**  | Estimates what each task would have taken without AI |
+| **Dollar value**            | Time saved × your hourly rate                        |
+| **Net ROI**                 | Value generated minus the $100/mo subscription cost  |
+| **Category breakdown**      | Which task types have the highest and lowest ROI     |
+| **Friction patterns**       | What's destroying your ROI and how to fix it         |
+| **Recommendations**         | Specific, actionable prompts and workflow changes    |
+| **Interactive HTML report** | Sortable session table, charts, expandable rows      |
+| **Local processing**        | All session data stays on-device                     |
 
-### How It Works
+---
+
+## Usage
+
+```
+/roi-calculator:generate
+```
+
+On first run, you'll be asked for your hourly rate (stored locally, never shared).
+
+### Flags
+
+| Flag                 | Description                                                         |
+| -------------------- | ------------------------------------------------------------------- |
+| `--rate 200`         | Override hourly rate for this run (does not update saved config)    |
+| `--reset-cache`      | Delete all cached ROI facets and re-analyze everything from scratch |
+| `--since 2025-01-01` | Only analyze sessions on or after this date                         |
+
+**Examples:**
+
+```
+/roi-calculator:generate --rate 200
+/roi-calculator:generate --since 2025-03-01
+/roi-calculator:generate --reset-cache
+```
+
+---
+
+## How It Works
 
 ```
 /roi-calculator:generate
        ↓
-Python CLI scans ~/.claude/projects/**/*.jsonl
+Load config (hourly rate) — prompt on first run, cached after
        ↓
-Filters low-signal sessions (<2 user messages, <1 min duration, agent/subagent sessions)
+Scan ~/.claude/projects/**/*.jsonl
+Filter: exclude agent sessions, <2 user messages, <1 min duration
        ↓
-Haiku call per session: splits user messages into individual task units
+[Per session, up to 50 new] Haiku call: extract ROI facets
+  → task category, outcome, estimated manual effort, friction observed
+  → cached to ~/.claude/usage-data/roi-facets/<session-id>.json
        ↓
-Haiku call per task: estimates manual time, task type, confidence, reasoning
+Score each session locally (no LLM)
+  → time saved = estimated manual − actual duration
+  → dollar value = time saved × hourly rate
+  → verdict: positive / neutral / negative
        ↓
-Computes ROI metrics: time saved, acceleration multiple, dollar value
+Aggregate across all sessions
+  → overall verdict, by-category stats, top friction types
        ↓
-Haiku call over all tasks: generates high-ROI areas, low-ROI patterns, suggestions
+[4 parallel Haiku calls] Analysis prompts
+  → ROI narrative, category analysis, friction analysis, recommendations
        ↓
-HTML report saved to ~/.claude/roi-data/report-YYYY-MM-DD.html
+[1 Haiku call] Executive summary
+       ↓
+Render interactive HTML report → ~/.claude/usage-data/roi-report.html
 ```
 
 **Key details:**
 
-- LLM (Haiku-tier) handles estimation and insight generation only
-- Low-cost model used for all LLM calls to keep operating cost minimal
-- All data stays local; no session content is sent to external services
+- All LLM calls use `claude-haiku-4-5` to keep cost minimal
+- Facets are cached — subsequent runs only process new sessions
+- Long transcripts (>30k chars) are summarized before analysis
+- Manual effort outliers are capped at 10× session duration
 
 ---
 
-## Output
+## Report Sections
 
-The report includes three sections:
+1. **Executive Summary** — verdict line, net dollar value, driving/hurting ROI cards
+2. **Key Metrics** — time saved, value generated, net ROI, session counts, ROI %
+3. **ROI Over Time** — cumulative value chart (Chart.js)
+4. **Session Breakdown** — sortable, expandable table with every session
+5. **Category Breakdown** — per-category bar chart and best/worst analysis
+6. **ROI Narrative** — honest plain-English assessment of your overall ROI
+7. **Friction Patterns** — top patterns destroying ROI with specific fixes
+8. **Recommendations** — quick wins with copyable prompts + strategic shifts
 
-**Summary dashboard**
-
-- Total time saved across all sessions
-- Total value created (at your hourly rate)
-- Overall acceleration multiple
-
-**Task table**
-
-- Per-session breakdown: AI time, estimated manual time, time saved, acceleration, dollar value
-
-**Insights**
-
-- High-ROI areas (where Claude accelerates you most)
-- Low-ROI patterns (where AI adds less value)
-- Optimization suggestions
-
-Report is saved to `~/.claude/roi-data/report-YYYY-MM-DD.html`.
+Report is saved to `~/.claude/usage-data/roi-report.html`.
 
 ---
 
 ## Requirements
 
 - **Python 3.10+**
-- Claude Code with skill support
-
----
-
-## Commands
-
-| Command                    | Description                                      |
-| -------------------------- | ------------------------------------------------ |
-| `/roi-calculator:generate` | Generate an ROI report from your Claude sessions |
+- **`anthropic` Python package** (`pip install anthropic`)
+- **`ANTHROPIC_API_KEY`** environment variable set
+- Claude Code with plugin support
 
 ---
 
@@ -112,9 +143,9 @@ Report is saved to `~/.claude/roi-data/report-YYYY-MM-DD.html`.
 **All processing is local:**
 
 - Sessions are read from your local `~/.claude/projects/` directory
-- Python CLI runs entirely on-device
-- No session data is sent anywhere beyond your local Claude instance
-- Report is saved locally to `~/.claude/roi-data/`
+- LLM calls go only to Anthropic's API (same as your normal Claude Code usage)
+- No session data is sent to any third-party service
+- Config and cache are stored locally in `~/.claude/usage-data/`
 
 ---
 
