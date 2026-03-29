@@ -63,7 +63,7 @@ Use a **separate cache directory** (`roi-facets/`) from the insights command (`f
 1. Load config (hourly rate)
 2. Filter session logs and extract metadata
 3. Summarize long transcripts (if needed)
-4. Extract ROI facets per session via LLM
+4. Extract ROI facets per session via Claude Code subprocess
 5. Score each session (time saved, dollar value, verdict)
 6. Aggregate and run 4 analysis prompts
 7. Generate executive summary
@@ -127,14 +127,17 @@ TRANSCRIPT CHUNK:
 
 ---
 
-## Stage 3: ROI Facet Extraction (Per-Session LLM Call)
+## Stage 3: ROI Facet Extraction (Per-Session Claude Code Subprocess Call)
 
-This is the core of the ROI model. The LLM reads the session and estimates what the work would have taken manually.
+This is the core of the ROI model. A Claude Code subprocess reads the session and estimates what the work would have taken manually.
 
-**Model:** claude-haiku-4-5
-**Max output tokens:** 2048
+**Execution:** invoke the local Claude Code CLI via subprocess, e.g. `claude --print`
+**Model selection:** use the developer's normal Claude Code account/configuration rather than hardcoding an API model name
+**Max output tokens:** target roughly 2048 tokens worth of response text
 **Max new sessions per run:** 50
 **Caching:** Save to `~/.claude/usage-data/roi-facets/<session-id>.json`. Skip if cached.
+
+Implementation note: the command should shell out to Claude Code as a subprocess, pass the prompt on stdin, and capture stdout/stderr for parsing and error handling. Do not depend on the Anthropic SDK or direct Claude API credentials for this workflow.
 
 ### Prompt
 
@@ -208,9 +211,9 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 
 ---
 
-## Stage 4: Per-Session ROI Scoring (Local Computation, No LLM)
+## Stage 4: Per-Session ROI Scoring (Local Computation, No Subprocess Call)
 
-After facets are extracted, compute scores locally — no additional API calls needed for this stage.
+After facets are extracted, compute scores locally — no additional Claude subprocess calls are needed for this stage.
 
 ```typescript
 interface SessionROIScore {
@@ -349,10 +352,11 @@ interface AggregatedROI {
 
 ---
 
-## Stage 6: LLM Analysis Prompts (4 Calls, Run in Parallel)
+## Stage 6: Claude Code Analysis Prompts (4 Subprocess Calls, Run in Parallel)
 
-**Model:** claude-haiku-4-5
-**Max output tokens:** 4096 per prompt
+**Execution:** run 4 Claude Code subprocess calls in parallel
+**Model selection:** use the developer's configured Claude Code environment
+**Max output tokens:** target roughly 4096 tokens per prompt
 
 Each prompt receives the full `AggregatedROI` JSON.
 
@@ -472,12 +476,12 @@ DATA:
 
 ---
 
-## Stage 7: Executive Summary (1 LLM Call)
+## Stage 7: Executive Summary (1 Claude Code Subprocess Call)
 
 Run after all Stage 6 calls complete. Receives all Stage 6 outputs as context.
 
-**Model:** claude-haiku-4-5
-**Max output tokens:** 2048
+**Execution:** one final Claude Code subprocess call
+**Max output tokens:** target roughly 2048 tokens
 
 ```
 Write a 4-part executive summary for a developer's Claude Code ROI report.
@@ -513,6 +517,27 @@ AGGREGATE DATA:
 ## Stage 8: HTML Report Generation
 
 Generate a single self-contained HTML file at `~/.claude/usage-data/roi-report.html`.
+
+---
+
+## Runtime Architecture
+
+The implementation should be local-first and reuse the installed Claude Code CLI instead of calling Anthropic APIs directly.
+
+### LLM Execution Strategy
+
+- Use Python `subprocess.run(...)` to invoke `claude --print`
+- Send the assembled prompt via stdin
+- Read structured JSON responses from stdout
+- Treat non-zero exit codes, timeouts, or malformed JSON as recoverable per-session/per-prompt failures
+- Continue processing other sessions when one subprocess call fails
+
+### Why This Design
+
+- No separate `ANTHROPIC_API_KEY` management is required
+- The command uses the same Claude Code environment/auth the developer already has configured
+- This matches how the rest of the plugin operates in local Claude Code workflows
+- It keeps the implementation simpler than maintaining a direct SDK/API integration
 
 ### Required Sections (in order)
 
