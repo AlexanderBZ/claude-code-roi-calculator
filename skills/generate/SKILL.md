@@ -9,12 +9,25 @@ argument-hint: "[--rate AMOUNT] [--reset-cache] [--since YYYY-MM-DD]"
 
 Generate a comprehensive ROI analysis of your Claude Code sessions.
 
+## Script layout
+
+This skill now uses a split Python implementation under `scripts/`:
+
+- `roi.py` — main CLI entrypoint; always run this file
+- `sessions.py` — session discovery and filtering
+- `analysis.py` — Claude subprocess summarization/facet extraction/analysis
+- `scoring.py` — ROI scoring and aggregation
+- `report.py` — HTML report rendering
+- `constants.py` — shared paths and configuration constants
+
+Do not try to run the helper modules directly unless you are explicitly debugging the implementation. For normal usage, invoke only `roi.py`.
+
 ## Steps
 
 **1. Check for existing config:**
 
 ```bash
-cat ~/.claude/usage-data/generate-config.json 2>/dev/null
+cat ~/.claude/usage-data/roi-config.json 2>/dev/null
 ```
 
 **2. Handle missing config:**
@@ -27,14 +40,18 @@ If the config file does not exist AND `$ARGUMENTS` does not already contain `--r
 **3. Run the ROI calculator:**
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/generate.py" $ARGUMENTS
+python3 "${CLAUDE_SKILL_DIR}/scripts/roi.py" $ARGUMENTS
 ```
 
-**4. Open the report** once the script prints "Report saved":
+The script coordinates the full pipeline by importing the helper modules above.
+
+**4. Open the report** once the script prints `Report saved`:
 
 ```bash
-open ~/.claude/usage-data/generate-report.html
+open ~/.claude/usage-data/roi-report.html
 ```
+
+If the script fails with a message indicating the `claude` CLI is missing or unauthenticated, stop and tell the user they need a working local Claude Code CLI session before this skill can complete.
 
 ## Available flags
 
@@ -50,3 +67,9 @@ open ~/.claude/usage-data/generate-report.html
 - `/generate --rate 200` — Run with a different rate
 - `/generate --since 2025-01-01` — Analyze only sessions from 2025 onward
 - `/generate --reset-cache` — Force re-analysis of all sessions
+
+## Expected outputs
+
+- Config: `~/.claude/usage-data/roi-config.json`
+- Cached facets: `~/.claude/usage-data/roi-facets/<session-id>.json`
+- Report: `~/.claude/usage-data/roi-report.html`
