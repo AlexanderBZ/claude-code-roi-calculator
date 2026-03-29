@@ -68,7 +68,7 @@ def _render_friction_section(friction_analysis: dict) -> str:
     if not friction_analysis:
         return ""
     intro = friction_analysis.get("intro", "")
-    impact_colors = {"high": "#dc2626", "medium": "#f97316", "low": "#eab308"}
+    impact_colors = {"high": "#ff3b30", "medium": "#ff9f0a", "low": "#ffd60a"}
     patterns_html = "".join(
         f"""<div class="friction-card">
           <div class="friction-header">
@@ -89,7 +89,7 @@ def _render_friction_section(friction_analysis: dict) -> str:
 def _render_recommendations_section(recommendations: dict) -> str:
     if not recommendations:
         return ""
-    impact_colors = {"high": "#16a34a", "medium": "#65a30d", "low": "#eab308"}
+    impact_colors = {"high": "#34c759", "medium": "#30b0c7", "low": "#007aff"}
     qw_html = "".join(
         f"""<div class="rec-card">
           <div class="rec-header">
@@ -168,7 +168,7 @@ def render_html(scores: list[dict], aggregated: dict, insights: dict, config: di
     cat_labels_js = json.dumps([CATEGORY_LABELS.get(k, k) for k in cat_keys])
     cat_values_js = json.dumps([by_cat[k]["avg_dollar_value"] for k in cat_keys])
     cat_colors_js = json.dumps([
-        "#30d158" if by_cat[k]["avg_dollar_value"] >= 0 else "#ff453a"
+        "#34c759" if by_cat[k]["avg_dollar_value"] >= 0 else "#ff3b30"
         for k in cat_keys
     ])
 
@@ -205,42 +205,26 @@ def render_html(scores: list[dict], aggregated: dict, insights: dict, config: di
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {{
-    --bg: #f2f2f7;
+    --bg: #f5f5f7;
     --surface: #ffffff;
-    --surface2: #f2f2f7;
-    --surface3: #e5e5ea;
-    --border: rgba(0,0,0,0.08);
-    --border-strong: rgba(0,0,0,0.14);
-    --text: #1c1c1e;
+    --surface2: #f5f5f7;
+    --surface3: #e8e8ed;
+    --border: rgba(0,0,0,0.06);
+    --border-strong: rgba(0,0,0,0.10);
+    --text: #1d1d1f;
     --text-secondary: #6e6e73;
-    --text-tertiary: #aeaeb2;
-    --green: #30d158;
-    --red: #ff453a;
-    --blue: #007aff;
+    --text-tertiary: #86868b;
+    --green: #34c759;
+    --red: #ff3b30;
+    --blue: #0071e3;
     --yellow: #ff9f0a;
     --orange: #ff6b35;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
-    --radius: 18px;
-    --radius-sm: 10px;
-    --radius-xs: 7px;
-  }}
-  @media (prefers-color-scheme: dark) {{
-    :root {{
-      --bg: #000000;
-      --surface: #1c1c1e;
-      --surface2: #2c2c2e;
-      --surface3: #3a3a3c;
-      --border: rgba(255,255,255,0.08);
-      --border-strong: rgba(255,255,255,0.14);
-      --text: #ffffff;
-      --text-secondary: #ebebf599;
-      --text-tertiary: #ebebf54d;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
-      --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
-    }}
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 28px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --radius-xs: 8px;
   }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
@@ -250,129 +234,132 @@ def render_html(scores: list[dict], aggregated: dict, insights: dict, config: di
 
   .nav {{
     position: sticky; top: 0; z-index: 100; display: flex; overflow-x: auto;
-    background: rgba(242,242,247,0.72); backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.82); backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
   }}
-  @media (prefers-color-scheme: dark) {{
-    .nav {{ background: rgba(28,28,30,0.72); }}
-  }}
-  .nav a {{ padding: 13px 18px; color: var(--text-secondary); font-size: 13px; font-weight: 500;
-    white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s; }}
+  .nav a {{ padding: 14px 20px; color: var(--text-secondary); font-size: 13px; font-weight: 500;
+    white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }}
   .nav a:hover {{ color: var(--blue); border-bottom-color: var(--blue); }}
 
-  .container {{ max-width: 1160px; margin: 0 auto; padding: 40px 24px; }}
-  .section {{ margin-bottom: 56px; scroll-margin-top: 60px; }}
+  .container {{ max-width: 1160px; margin: 0 auto; padding: 48px 24px; }}
+  .section {{ margin-bottom: 64px; scroll-margin-top: 64px; }}
 
-  .header {{ text-align: center; margin-bottom: 48px; }}
-  .header h1 {{ font-size: 2.4rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 8px; }}
-  .date-range {{ color: var(--text-secondary); margin-bottom: 20px; font-size: 15px; }}
-  .verdict-badge {{ display: inline-block; padding: 7px 22px; border-radius: 9999px;
-    font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em;
-    background: {verdict_color}18; color: {verdict_color}; }}
+  .header {{ text-align: center; margin-bottom: 56px; }}
+  .header h1 {{ font-size: 2.8rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 10px;
+    background: linear-gradient(135deg, #1d1d1f 0%, #3d3d3f 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }}
+  .date-range {{ color: var(--text-secondary); margin-bottom: 22px; font-size: 15px; letter-spacing: 0.01em; }}
+  .verdict-badge {{ display: inline-block; padding: 8px 24px; border-radius: 9999px;
+    font-weight: 600; font-size: 0.8rem; letter-spacing: 0.08em;
+    background: {verdict_color}14; color: {verdict_color}; border: 1px solid {verdict_color}28; }}
 
-  .card {{ background: var(--surface); border-radius: var(--radius); padding: 28px;
+  .card {{ background: var(--surface); border-radius: var(--radius); padding: 32px;
     box-shadow: var(--shadow-md); border: 1px solid var(--border); }}
-  .badge {{ display: inline-block; padding: 3px 9px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600; white-space: nowrap; letter-spacing: 0.02em; }}
+  .badge {{ display: inline-block; padding: 3px 10px; border-radius: 9999px;
+    font-size: 11px; font-weight: 600; white-space: nowrap; letter-spacing: 0.03em; }}
   .callout {{ background: var(--surface2); border-radius: var(--radius-sm);
-    padding: 14px 18px; color: var(--text-secondary); font-size: 13.5px; line-height: 1.6;
+    padding: 16px 20px; color: var(--text-secondary); font-size: 13.5px; line-height: 1.65;
     border: 1px solid var(--border); }}
-  .callout-warn {{ border-left: 3px solid var(--yellow); }}
+  .callout-warn {{ border-left: 3px solid var(--yellow); background: #ff9f0a0a; }}
 
   .metrics-bar {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
-    gap: 14px; margin-bottom: 36px; }}
-  .metric-tile {{ background: var(--surface); border-radius: var(--radius); padding: 20px 16px;
+    gap: 12px; margin-bottom: 40px; }}
+  .metric-tile {{ background: var(--surface); border-radius: var(--radius); padding: 22px 18px;
     text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border);
-    transition: box-shadow 0.2s; }}
-  .metric-tile:hover {{ box-shadow: var(--shadow-md); }}
-  .metric-value {{ font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 5px; }}
-  .metric-label {{ font-size: 12px; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.01em; }}
+    transition: box-shadow 0.2s, transform 0.15s; }}
+  .metric-tile:hover {{ box-shadow: var(--shadow-md); transform: translateY(-1px); }}
+  .metric-value {{ font-size: 1.65rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 6px; }}
+  .metric-label {{ font-size: 11.5px; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.02em; }}
   .metric-positive {{ color: var(--green); }}
   .metric-negative {{ color: var(--red); }}
 
-  .section-title {{ font-size: 1.25rem; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 16px; }}
-  .sub-section-title {{ font-size: 1rem; font-weight: 600; margin: 24px 0 14px; color: var(--text-secondary); letter-spacing: 0.01em; }}
+  .section-title {{ font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 18px;
+    color: var(--text); }}
+  .sub-section-title {{ font-size: 0.95rem; font-weight: 600; margin: 28px 0 14px;
+    color: var(--text-secondary); letter-spacing: 0.04em; text-transform: uppercase; font-size: 11px; }}
 
-  .verdict-line {{ font-size: 1.45rem; font-weight: 700; text-align: center; margin: 12px 0 20px;
-    letter-spacing: -0.02em; }}
-  .dollar-display {{ font-size: 3rem; font-weight: 800; text-align: center; margin: 4px 0 28px;
-    letter-spacing: -0.04em; }}
-  .exec-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }}
-  .exec-card {{ background: var(--surface2); border-radius: var(--radius-sm); padding: 18px;
+  .verdict-line {{ font-size: 1.5rem; font-weight: 700; text-align: center; margin: 8px 0 18px;
+    letter-spacing: -0.025em; }}
+  .dollar-display {{ font-size: 3.2rem; font-weight: 800; text-align: center; margin: 4px 0 30px;
+    letter-spacing: -0.045em; }}
+  .exec-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }}
+  .exec-card {{ background: var(--surface2); border-radius: var(--radius-sm); padding: 20px;
     border: 1px solid var(--border); }}
-  .exec-card-wide {{ grid-column: 1 / -1; }}
-  .exec-label {{ font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
-    color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; }}
-  .exec-body {{ font-size: 14px; line-height: 1.65; }}
+  .exec-card-wide {{ grid-column: 1 / -1; background: linear-gradient(135deg, #f5f5f7 0%, #ececf0 100%); }}
+  .exec-label {{ font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-tertiary); margin-bottom: 8px; font-weight: 600; }}
+  .exec-body {{ font-size: 14px; line-height: 1.7; }}
 
   .chart-container {{ position: relative; height: 280px; }}
 
   .table-controls {{ display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }}
   .sort-btn {{ background: var(--surface2); border: 1px solid var(--border); color: var(--text-secondary);
-    padding: 7px 14px; border-radius: 9999px; cursor: pointer; font-size: 12.5px; font-weight: 500;
-    transition: all 0.15s; }}
-  .sort-btn:hover {{ color: var(--text); border-color: var(--border-strong); }}
-  .sort-btn.active {{ background: var(--blue); border-color: var(--blue); color: #fff; }}
+    padding: 7px 16px; border-radius: 9999px; cursor: pointer; font-size: 12px; font-weight: 500;
+    transition: all 0.15s; letter-spacing: 0.01em; }}
+  .sort-btn:hover {{ color: var(--text); border-color: var(--border-strong); background: var(--surface3); }}
+  .sort-btn.active {{ background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 1px 6px rgba(0,113,227,0.25); }}
   .session-table {{ width: 100%; border-collapse: collapse; font-size: 13.5px; }}
   .session-table th {{ background: var(--surface2); padding: 11px 14px; text-align: left;
     border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
-    white-space: nowrap; color: var(--text-secondary); font-weight: 600; font-size: 12px;
-    letter-spacing: 0.03em; }}
+    white-space: nowrap; color: var(--text-tertiary); font-weight: 600; font-size: 11px;
+    letter-spacing: 0.05em; text-transform: uppercase; }}
   .session-table th:first-child {{ border-radius: var(--radius-xs) 0 0 0; }}
   .session-table th:last-child {{ border-radius: 0 var(--radius-xs) 0 0; }}
   .session-table th:hover {{ color: var(--text); }}
-  .session-table td {{ padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }}
-  .session-table tr:hover td {{ background: var(--surface2); }}
-  .detail-content {{ background: var(--surface2); padding: 18px; border-bottom: 1px solid var(--border); }}
-  .detail-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 13px; }}
-  .detail-label {{ color: var(--text-secondary); font-size: 11px; margin-bottom: 4px;
-    font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }}
+  .session-table td {{ padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }}
+  .session-table tr:hover td {{ background: rgba(0,113,227,0.025); }}
+  .detail-content {{ background: var(--surface2); padding: 20px; border-bottom: 1px solid var(--border); }}
+  .detail-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px; }}
+  .detail-label {{ color: var(--text-tertiary); font-size: 10.5px; margin-bottom: 4px;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }}
   .confidence-dot {{ width: 6px; height: 6px; border-radius: 50%; background: var(--yellow);
     display: inline-block; margin-left: 4px; vertical-align: middle; }}
 
   .cat-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }}
-  .cat-card {{ background: var(--surface2); border-radius: var(--radius-sm); padding: 18px;
-    border: 1px solid var(--border); transition: box-shadow 0.2s; }}
-  .cat-card:hover {{ box-shadow: var(--shadow-sm); }}
+  .cat-card {{ background: var(--surface); border-radius: var(--radius-sm); padding: 20px;
+    border: 1px solid var(--border); transition: box-shadow 0.2s, transform 0.15s; box-shadow: var(--shadow-sm); }}
+  .cat-card:hover {{ box-shadow: var(--shadow-md); transform: translateY(-1px); }}
   .cat-positive {{ border-left: 3px solid var(--green); }}
   .cat-negative {{ border-left: 3px solid var(--red); }}
-  .cat-label {{ font-weight: 600; margin-bottom: 7px; font-size: 14px; }}
-  .cat-why {{ color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin: 0; }}
+  .cat-label {{ font-weight: 600; margin-bottom: 8px; font-size: 14px; }}
+  .cat-why {{ color: var(--text-secondary); font-size: 13px; line-height: 1.65; margin: 0; }}
 
   .friction-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }}
-  .friction-card {{ background: var(--surface); border-radius: var(--radius); padding: 22px;
-    box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: box-shadow 0.2s; }}
-  .friction-card:hover {{ box-shadow: var(--shadow-md); }}
+  .friction-card {{ background: var(--surface); border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: box-shadow 0.2s, transform 0.15s; }}
+  .friction-card:hover {{ box-shadow: var(--shadow-md); transform: translateY(-1px); }}
   .friction-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }}
   .friction-name {{ font-weight: 600; font-size: 14.5px; }}
-  .fix-block {{ background: var(--surface2); border-radius: var(--radius-xs); padding: 11px 14px;
-    font-size: 13px; color: var(--text-secondary); margin-top: 12px; line-height: 1.6;
-    border: 1px solid var(--border); }}
+  .fix-block {{ background: #f0f7ff; border-radius: var(--radius-xs); padding: 12px 16px;
+    font-size: 13px; color: #0056b8; margin-top: 12px; line-height: 1.65;
+    border: 1px solid #d0e4ff; }}
 
   .rec-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }}
-  .rec-card {{ background: var(--surface); border-radius: var(--radius); padding: 22px;
-    box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: box-shadow 0.2s; }}
-  .rec-card:hover {{ box-shadow: var(--shadow-md); }}
+  .rec-card {{ background: var(--surface); border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: box-shadow 0.2s, transform 0.15s; }}
+  .rec-card:hover {{ box-shadow: var(--shadow-md); transform: translateY(-1px); }}
   .rec-header {{ display: flex; justify-content: space-between; align-items: flex-start;
-    gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }}
+    gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }}
   .rec-title {{ font-weight: 600; font-size: 14.5px; }}
-  .prompt-block {{ position: relative; background: var(--surface2); border-radius: var(--radius-xs);
-    padding: 12px 44px 12px 14px; font-family: "SF Mono", ui-monospace, monospace; font-size: 12px;
+  .prompt-block {{ position: relative; background: #f9f9fb; border-radius: var(--radius-xs);
+    padding: 12px 48px 12px 16px; font-family: "SF Mono", ui-monospace, monospace; font-size: 12px;
     color: var(--text-secondary); word-break: break-word; border: 1px solid var(--border); }}
   .copy-btn {{ position: absolute; top: 8px; right: 8px; background: var(--blue);
-    color: white; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer;
-    font-size: 11px; font-weight: 600; transition: opacity 0.15s; }}
-  .copy-btn:hover {{ opacity: 0.8; }}
+    color: white; border: none; border-radius: 7px; padding: 4px 11px; cursor: pointer;
+    font-size: 11px; font-weight: 600; transition: opacity 0.15s, transform 0.1s;
+    box-shadow: 0 1px 4px rgba(0,113,227,0.2); }}
+  .copy-btn:hover {{ opacity: 0.88; transform: scale(1.02); }}
 
-  .footer {{ text-align: center; padding: 40px 20px; color: var(--text-secondary);
-    font-size: 12.5px; line-height: 2.2; }}
+  .footer {{ text-align: center; padding: 48px 20px; color: var(--text-tertiary);
+    font-size: 12px; line-height: 2.4; border-top: 1px solid var(--border); margin-top: 8px; }}
 
   @media (max-width: 900px) {{
     .exec-grid, .detail-grid {{ grid-template-columns: 1fr; }}
     .metrics-bar {{ grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }}
-    .header h1 {{ font-size: 1.9rem; }}
-    .dollar-display {{ font-size: 2.4rem; }}
+    .header h1 {{ font-size: 2.1rem; }}
+    .dollar-display {{ font-size: 2.5rem; }}
+    .container {{ padding: 32px 16px; }}
   }}
 </style>
 </head>
@@ -487,10 +474,9 @@ const VERDICT_COLORS = {json.dumps(VERDICT_COLORS)};
 const EFFICIENCY_COLORS = {json.dumps(EFFICIENCY_COLORS)};
 const OUTCOME_COLORS = {json.dumps(OUTCOME_COLORS)};
 
-// ── Theme-aware colors ───────────────────────────────────────────────────────
-const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const tickColor = isDark ? '#ebebf599' : '#6e6e73';
-const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+// ── Chart colors (light mode) ────────────────────────────────────────────────
+const tickColor = '#86868b';
+const gridColor = 'rgba(0,0,0,0.05)';
 
 // ── Charts ───────────────────────────────────────────────────────────────────
 new Chart(document.getElementById('roiChart').getContext('2d'), {{
@@ -538,7 +524,7 @@ function fmtMins(m) {{
   return m >= 60 ? (m/60).toFixed(1) + 'h' : Math.round(m) + 'm';
 }}
 function fmtDollars(v) {{
-  const color = v > 0 ? '#30d158' : v < 0 ? '#ff453a' : '#6e6e73';
+  const color = v > 0 ? '#34c759' : v < 0 ? '#ff3b30' : '#86868b';
   return `<span style="color:${{color}};font-weight:600">${{v >= 0 ? '+' : ''}}$${{Math.abs(v).toFixed(2)}}</span>`;
 }}
 
