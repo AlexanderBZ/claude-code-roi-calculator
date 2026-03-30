@@ -4,7 +4,7 @@ Generate an ROI report from your Claude Code sessions. Run one command, automati
 
 [![License](https://img.shields.io/github/license/AlexanderBZ/claude-code-roi-calculator)](LICENSE) [![Stars](https://img.shields.io/github/stars/AlexanderBZ/claude-code-roi-calculator)](https://github.com/AlexanderBZ/claude-code-roi-calculator)
 
-![cover](cover.png)
+<video src="roi-calculator-video.mp4" autoplay loop muted playsinline></video>
 
 ## Install
 
